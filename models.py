@@ -49,7 +49,7 @@ class Models:
     @staticmethod
     def classify(x_test, y_test, x_train, y_train, train=True):
         # Identify Models Names
-        models = ['Logistic Regression', 'Decision Tree', 'Random Forest','SVM Linear Kernel'
+        models = ['Logistic Regression', 'Decision Tree', 'Random Forest', 'SVM Linear Kernel',
                   'SVM RPF Kernel', 'Gaussian Naive Bayes', 'AdaBoost', 'Gradient Boost']
 
         # Identify Models Classifiers
