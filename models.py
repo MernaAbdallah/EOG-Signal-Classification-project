@@ -49,16 +49,19 @@ class Models:
     @staticmethod
     def classify(x_test, y_test, x_train, y_train, train=True):
         # Identify Models Names
-        models = ['Logistic Regression', 'Decision Tree', 'Random Forest',
-                  'SVM Linear Kernel', 'Gaussian Naive Bayes', 'AdaBoost', 'Gradient Boost']
+        models = ['Logistic Regression', 'Decision Tree', 'Random Forest','SVM Linear Kernel'
+                  'SVM RPF Kernel', 'Gaussian Naive Bayes', 'AdaBoost', 'Gradient Boost']
 
         # Identify Models Classifiers
-        clf = [LogisticRegression(max_iter=1000, random_state=42, C=10, penalty='l2', solver='lbfgs'),
-               DecisionTreeClassifier(criterion='gini', max_depth=5, min_samples_leaf=2, min_samples_split=2),
-               RandomForestClassifier(bootstrap=False, max_depth=15, min_samples_leaf=1, min_samples_split=2,
-                                      n_estimators=200),
-               SVC(kernel='linear', C=10, degree=2, gamma='scale'), GaussianNB(priors=None, var_smoothing=1e-08),
-               AdaBoostClassifier(learning_rate=0.1, n_estimators=200),
+        clf = [LogisticRegression(max_iter=50, random_state=42, C=0.1, penalty='l2', solver='newton-cg'),
+               DecisionTreeClassifier(max_features='sqrt', max_depth=15, min_samples_leaf=2, min_samples_split=10),
+               RandomForestClassifier(max_depth=5, min_samples_leaf=1, min_samples_split=5,
+                                      n_estimators=50, max_features='log2'),
+               SVC(kernel='linear', C=10, degree=2, gamma='scale'),
+               SVC(kernel='rpf', C=10, gamma=0.001),
+
+               GaussianNB(),
+               AdaBoostClassifier(learning_rate=0.01, n_estimators=50, algorithm='SAMME.R'),
                GradientBoostingClassifier(learning_rate=0.1, max_depth=5, n_estimators=50), ]
 
         acc, mse, reports, train_acc = [], [], [], []
