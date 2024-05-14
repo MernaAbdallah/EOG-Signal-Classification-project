@@ -6,7 +6,9 @@ import models as mod
 import gui as gui
 
 gui.Gui()
-
+# 1) make another 5 test scenarios
+# 2) plot the data before and after preprocessing
+# 3) save the signals after preprocessing in files
 # ys, data, label = ps.PreProcessing.label_encode()
 # preprocessed_data = []
 #
