@@ -61,25 +61,24 @@ class Gui:
 
     def load_folder(self):
         folder_path = filedialog.askdirectory()
-        ps.PreProcessing.add_data_to_csv(folder_path)
-        ys, data = ps.PreProcessing.label_encode(['test_data.csv'])
+        paths = ps.PreProcessing.add_data_to_csv(folder_path)
+        ys, data, le = ps.PreProcessing.label_encode(paths)
         preprocessed_data = []
         for dt in data:
             preprocessed_data.append(ps.PreProcessing.preprocess_signal(dt))
-
-        x_test, y_test, x_train, y_train = fe.FeatureExtraction.statistical_features(ys, preprocessed_data)
-        # models, acc, mse, reports, train_acc = mod.Models.classify(x_test, y_test, x_train, y_train, False)
-        # for i in range(len(models)):
-        #     print(f'========== {models[i]} ==========')
-        #     print(f'Train Accuracy  = {train_acc[i]}')
-        #     print(f"Test Accuracy: {acc[i]} %")
-        #     print('================================')
+        x_test, y_test, x_train, y_train = fe.FeatureExtraction.statistical_features(ys, preprocessed_data, False)
+        models, acc, mse, reports, predictions = mod.Models.classify(x_test, y_test, le, x_train, y_train, False)
+        for i in range(len(models)):
+            print(f'========== {models[i]} ==========')
+            print(f"Test Accuracy: {acc[i]} %")
+            print('================================')
 
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('EOG')
         self.root.geometry('1000x600')
         self.image_path = None
+        self.blank = False
         self.button_frame = tk.Frame(self.root)
         self.button_frame.columnconfigure(0, weight=2)
         self.task1_btn = tk.Button(self.button_frame, text='Test', command=self.load_folder)
@@ -87,7 +86,9 @@ class Gui:
         if self.image_path is not None:
             self.img2 = ImageTk.PhotoImage(Image.open(self.image_path), size=50)
             self.panel2 = tk.Label(self.root, image=self.img2)
-            self.panel2.pack(side="bottom", fill='both', expand='yes')
-
+            self.panel2.pack(side="bottom", fill='both', expand=tk.YES)
+        if self.blank:
+            self.label = tk.Label(self.root, text='Blink', font=("Arial", 25, "bold"), )
+            self.label.pack(side="bottom", fill='both', expand=tk.YES)
         self.button_frame.pack(fill='x', pady=10)
         self.root.mainloop()

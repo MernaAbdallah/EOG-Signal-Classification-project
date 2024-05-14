@@ -24,7 +24,7 @@ class PreProcessing:
             return None
 
     @staticmethod
-    def get_train_test_data(csv_paths=None):
+    def __get_train_test_data(csv_paths=None, train=True):
         if csv_paths is None:
             csv_paths = ['Test-V_CSV.csv', 'Test-H_CSV.csv', 'Train-V_CSV.csv', 'Train-H_CSV.csv']
         dfs = []
@@ -32,7 +32,8 @@ class PreProcessing:
         for csv_path in csv_paths:
             df = PreProcessing.__read_csv_to_dataframe(csv_path)
             df = df.transpose()
-            df = df.rename(columns={df.columns[-1]: 'label'})
+            if train:
+                df = df.rename(columns={df.columns[-1]: 'label'})
             dfs.append(df)
 
         return dfs
@@ -49,7 +50,7 @@ class PreProcessing:
 
     @staticmethod
     def label_encode(csv_paths=None):
-        dfs = PreProcessing.get_train_test_data(csv_paths)
+        dfs = PreProcessing.__get_train_test_data(csv_paths)
         le = LabelEncoder()
         ys, data = [], [],
         for df in dfs:
@@ -58,7 +59,7 @@ class PreProcessing:
             y = y.apply(lambda x: re.search(r'\D+', x).group(0))
             le.fit(y)
             ys.append(le.transform(y))
-        return ys, data
+        return ys, data, le
 
     @staticmethod
     def preprocess_signal(train_set):
@@ -78,19 +79,30 @@ class PreProcessing:
 
     @staticmethod
     def add_data_to_csv(folder_path):
-        text_files = [file for file in os.listdir(folder_path) if file.endswith('.txt')]
-        file_contents = []
-        file_names = []
-        for file_name in text_files:
-            file_path = os.path.join(folder_path, file_name)
-            with open(file_path, 'r') as file:
-                data = [line.strip() for line in file.readlines()]
-                file_contents.append(data)
-                file_names.append(file_name)
+        text_files_v = [file for file in os.listdir(folder_path) if file.endswith('v.txt')]
+        text_files_h = [file for file in os.listdir(folder_path) if file.endswith('h.txt')]
 
-        transposed_contents = list(map(list, zip(*file_contents)))
+        paths = []
+        for i in range(2):
+            if i == 0:
+                csv_path = 'test_data_v.csv'
+                text_files = text_files_v
+            else:
+                csv_path = 'test_data_h.csv'
+                text_files = text_files_h
+            paths.append(csv_path)
+            file_contents = []
+            file_names = []
+            for file_name in text_files:
+                file_path = os.path.join(folder_path, file_name)
+                with open(file_path, 'r') as file:
+                    data = [line.strip() for line in file.readlines()]
+                    file_contents.append(data)
+                    file_names.append(file_name)
+            transposed_contents = list(map(list, zip(*file_contents)))
+            with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerows(transposed_contents)
+                writer.writerow(file_names)
 
-        with open('test_data.csv', 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerows(transposed_contents)
-            writer.writerow(file_names)
+        return paths

@@ -1,5 +1,6 @@
+from collections import Counter
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.metrics import mean_squared_error, accuracy_score, classification_report
@@ -21,33 +22,7 @@ class Models:
             return pickle.load(file)
 
     @staticmethod
-    def gridSearch(x_test, y_test, x_train, y_train):
-        models = {
-            'Gradient Boosting': GradientBoostingClassifier()
-        }
-
-        # Define expanded parameters for grid search for each model
-        params = {
-            'Gradient Boosting': {'n_estimators': [50, 100, 200, 300],
-                                  'learning_rate': [0.01, 0.1, 1],
-                                  'max_depth': [3, 5, 7, 9],
-                                  'min_samples_split': [2, 5, 10],
-                                  'min_samples_leaf': [1, 2, 4],
-                                  'max_features': ['auto', 'sqrt', 'log2']}
-        }
-
-        # Perform GridSearchCV for each model
-        for name, model in models.items():
-            print(f"Grid search CV for {name}")
-            grid_search = GridSearchCV(model, params[name], cv=5, n_jobs=-1)
-            grid_search.fit(x_train, y_train)
-            print("Best parameters:", grid_search.best_params_)
-            print("Best cross-validation score:", grid_search.best_score_)
-            print("Test set score:", grid_search.score(x_test, y_test))
-            print()
-
-    @staticmethod
-    def classify(x_test, y_test, x_train, y_train, train=True):
+    def classify(x_test, y_test, label_encode, x_train=None, y_train=None, train=True):
         # Identify Models Names
         models = ['Logistic Regression', 'Decision Tree', 'Random Forest', 'SVM Linear Kernel',
                   'SVM RPF Kernel', 'Gaussian Naive Bayes', 'AdaBoost', 'Gradient Boost']
@@ -62,9 +37,10 @@ class Models:
 
                GaussianNB(),
                AdaBoostClassifier(learning_rate=0.01, n_estimators=50, algorithm='SAMME.R'),
-               GradientBoostingClassifier(learning_rate=0.1, max_depth=5, n_estimators=50), ]
+               GradientBoostingClassifier(learning_rate=0.01, max_depth=3, n_estimators=50, max_features='sqrt',
+                                          min_samples_leaf=2, min_samples_split=5), ]
 
-        acc, mse, reports, train_acc = [], [], [], []
+        acc, mse, reports, predictions = [], [], [], []
 
         # Loop on Models to Determine the Classifier to Work With
         for i in range(len(models)):
@@ -75,21 +51,38 @@ class Models:
                 # Train the Model
                 working_clf = clf[i]
                 working_clf.fit(x_train, y_train)
-
                 # Save the Model in pickle to use it in testing
                 Models.__save_model(models[i], working_clf)
             else:
-
                 # In Test scenario
                 # Load the Trained Model from pickle
-                working_clf, train_time = Models.__get_saved_model(models[i])
+                working_clf = Models.__get_saved_model(models[i])
 
             # Get the accuracy of the trained model after predicting
             y_pred = working_clf.predict(x_test)
-            y_pred_train = working_clf.predict(x_train)
+            predictions.append(label_encode.inverse_transform(y_pred))
             mse.append(mean_squared_error(y_test, y_pred))
             acc.append(accuracy_score(y_test, y_pred) * 100)
-            train_acc.append(accuracy_score(y_train, y_pred_train) * 100)
             reports.append(classification_report(y_test, y_pred))
 
-        return models, acc, mse, reports, train_acc
+        files = [[] for _ in range(5)]
+        for pred in predictions:
+            for i, val in enumerate(pred):
+                files[i].append(val)
+
+        final_predictions = []
+        mapping = {
+            'yukarı' or 'yukari': 'up',
+            'asagi': 'down',
+            'sag': 'right',
+            'sol': 'left',
+            'kirp': 'blink'
+        }
+
+        for file in files:
+            prediction_counts = Counter(file)
+            most_common_prediction = prediction_counts.most_common(1)[0][0]
+            mapped_prediction = mapping.get(most_common_prediction.lower())
+            final_predictions.append(mapped_prediction)
+
+        return models, acc, mse, reports, final_predictions
