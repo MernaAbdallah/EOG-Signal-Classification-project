@@ -1,5 +1,10 @@
 import tkinter as tk
 import time
+from tkinter import filedialog
+import preprocessing as ps
+import feature_extraction as fe
+from PIL import ImageTk, Image
+import models as mod
 
 
 class ArrowWidget(tk.Canvas):
@@ -51,21 +56,38 @@ class ArrowWidget(tk.Canvas):
 
 class Gui:
 
+    def show_arrow(self, direction):
+        self.image_path = f'images/${direction}_arrow.png'
+
+    def load_folder(self):
+        folder_path = filedialog.askdirectory()
+        ps.PreProcessing.add_data_to_csv(folder_path)
+        ys, data = ps.PreProcessing.label_encode(['test_data.csv'])
+        preprocessed_data = []
+        for dt in data:
+            preprocessed_data.append(ps.PreProcessing.preprocess_signal(dt))
+
+        x_test, y_test, x_train, y_train = fe.FeatureExtraction.statistical_features(ys, preprocessed_data)
+        # models, acc, mse, reports, train_acc = mod.Models.classify(x_test, y_test, x_train, y_train, False)
+        # for i in range(len(models)):
+        #     print(f'========== {models[i]} ==========')
+        #     print(f'Train Accuracy  = {train_acc[i]}')
+        #     print(f"Test Accuracy: {acc[i]} %")
+        #     print('================================')
+
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('EOG')
         self.root.geometry('1000x600')
-        # left_arrow = ArrowWidget(self.root, [150, 450, 50, 500, 150, 550])
-        # up_arrow = ArrowWidget(self.root, [50, 250, 100, 150, 150, 250])
-        # right_arrow = ArrowWidget(self.root, [200, 250, 300, 300, 200, 350])
-        # down_arrow = ArrowWidget(self.root, [50, 200, 100, 300, 150, 200])
-        # left_arrow.pack(expand=True, fill=tk.BOTH, side=tk.LEFT)
-        # up_arrow.pack(expand=True, fill=tk.BOTH, side=tk.TOP)
-        # right_arrow.pack(expand=True, fill=tk.BOTH, side=tk.RIGHT)
-        # down_arrow.pack(expand=True, fill=tk.BOTH, side=tk.BOTTOM)
+        self.image_path = None
         self.button_frame = tk.Frame(self.root)
-        self.button_frame.columnconfigure(0, weight=1)
-        self.task1_btn = tk.Button(self.button_frame, text='Test')
+        self.button_frame.columnconfigure(0, weight=2)
+        self.task1_btn = tk.Button(self.button_frame, text='Test', command=self.load_folder)
         self.task1_btn.grid(row=0, sticky=tk.W + tk.E, padx=10)
+        if self.image_path is not None:
+            self.img2 = ImageTk.PhotoImage(Image.open(self.image_path), size=50)
+            self.panel2 = tk.Label(self.root, image=self.img2)
+            self.panel2.pack(side="bottom", fill='both', expand='yes')
+
         self.button_frame.pack(fill='x', pady=10)
         self.root.mainloop()

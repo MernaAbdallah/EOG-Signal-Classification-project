@@ -58,7 +58,7 @@ class Models:
                RandomForestClassifier(max_depth=5, min_samples_leaf=1, min_samples_split=5,
                                       n_estimators=50, max_features='log2'),
                SVC(kernel='linear', C=10, degree=2, gamma='scale'),
-               SVC(kernel='rpf', C=10, gamma=0.001),
+               SVC(kernel='rbf', C=10, gamma=0.001),
 
                GaussianNB(),
                AdaBoostClassifier(learning_rate=0.01, n_estimators=50, algorithm='SAMME.R'),

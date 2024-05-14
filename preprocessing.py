@@ -1,9 +1,10 @@
+import os
 import re
-
 import numpy as np
 import pandas as pd
 from scipy.signal import butter, filtfilt
 from sklearn.preprocessing import LabelEncoder, StandardScaler
+import csv
 
 
 class PreProcessing:
@@ -23,8 +24,10 @@ class PreProcessing:
             return None
 
     @staticmethod
-    def __get_train_test_data():
-        dfs, csv_paths = [], ['Test-V_CSV.csv', 'Test-H_CSV.csv', 'Train-V_CSV.csv', 'Train-H_CSV.csv']
+    def get_train_test_data(csv_paths=None):
+        if csv_paths is None:
+            csv_paths = ['Test-V_CSV.csv', 'Test-H_CSV.csv', 'Train-V_CSV.csv', 'Train-H_CSV.csv']
+        dfs = []
 
         for csv_path in csv_paths:
             df = PreProcessing.__read_csv_to_dataframe(csv_path)
@@ -45,18 +48,16 @@ class PreProcessing:
         return filtered
 
     @staticmethod
-    def label_encode():
-        dfs = PreProcessing.__get_train_test_data()
+    def label_encode(csv_paths=None):
+        dfs = PreProcessing.get_train_test_data(csv_paths)
         le = LabelEncoder()
         ys, data = [], [],
-
         for df in dfs:
             y = df.iloc[:, -1]
             data.append(df.drop(columns="label", axis=1).astype(float))
             y = y.apply(lambda x: re.search(r'\D+', x).group(0))
             le.fit(y)
             ys.append(le.transform(y))
-
         return ys, data
 
     @staticmethod
@@ -74,3 +75,22 @@ class PreProcessing:
 
         # Standardize the data and Create a new DataFrame with standardized data
         return pd.DataFrame(StandardScaler().fit_transform(data_dct), columns=data_dct.columns)
+
+    @staticmethod
+    def add_data_to_csv(folder_path):
+        text_files = [file for file in os.listdir(folder_path) if file.endswith('.txt')]
+        file_contents = []
+        file_names = []
+        for file_name in text_files:
+            file_path = os.path.join(folder_path, file_name)
+            with open(file_path, 'r') as file:
+                data = [line.strip() for line in file.readlines()]
+                file_contents.append(data)
+                file_names.append(file_name)
+
+        transposed_contents = list(map(list, zip(*file_contents)))
+
+        with open('test_data.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerows(transposed_contents)
+            writer.writerow(file_names)
