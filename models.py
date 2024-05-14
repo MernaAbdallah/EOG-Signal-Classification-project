@@ -40,7 +40,7 @@ class Models:
                GradientBoostingClassifier(learning_rate=0.01, max_depth=3, n_estimators=50, max_features='sqrt',
                                           min_samples_leaf=2, min_samples_split=5), ]
 
-        acc, mse, reports, predictions = [], [], [], []
+        acc, mse, reports, predictions, train_acc = [], [], [], [], []
 
         # Loop on Models to Determine the Classifier to Work With
         for i in range(len(models)):
@@ -64,25 +64,28 @@ class Models:
             mse.append(mean_squared_error(y_test, y_pred))
             acc.append(accuracy_score(y_test, y_pred) * 100)
             reports.append(classification_report(y_test, y_pred))
+            if train:
+                y_pred_train = working_clf.predict(x_train)
+                train_acc.append(accuracy_score(y_train, y_pred_train) * 100)
+        final_predictions = None
+        if not train:
+            files = [[] for _ in range(5)]
+            for pred in predictions:
+                for i, val in enumerate(pred):
+                    files[i].append(val)
 
-        files = [[] for _ in range(5)]
-        for pred in predictions:
-            for i, val in enumerate(pred):
-                files[i].append(val)
+            final_predictions = []
+            mapping = {
+                'yukarı' or 'yukari': 'up',
+                'asagi': 'down',
+                'sag': 'right',
+                'sol': 'left',
+                'kirp': 'blink'
+            }
 
-        final_predictions = []
-        mapping = {
-            'yukarı' or 'yukari': 'up',
-            'asagi': 'down',
-            'sag': 'right',
-            'sol': 'left',
-            'kirp': 'blink'
-        }
-
-        for file in files:
-            prediction_counts = Counter(file)
-            most_common_prediction = prediction_counts.most_common(1)[0][0]
-            mapped_prediction = mapping.get(most_common_prediction.lower())
-            final_predictions.append(mapped_prediction)
-
-        return models, acc, mse, reports, final_predictions
+            for file in files:
+                prediction_counts = Counter(file)
+                most_common_prediction = prediction_counts.most_common(1)[0][0]
+                mapped_prediction = mapping.get(most_common_prediction.lower())
+                final_predictions.append(mapped_prediction)
+        return models, acc, mse, reports, final_predictions, predictions, train_acc
