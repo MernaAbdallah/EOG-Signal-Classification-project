@@ -3,7 +3,6 @@ from tkinter import filedialog, ttk
 import preprocessing as ps
 import feature_extraction as fe
 import models as mod
-from matplotlib import pyplot as plt
 
 
 class Gui:
