@@ -4,12 +4,12 @@ import pywt
 
 
 class FeatureExtraction:
-    @staticmethod
     def statistical_features(ys, data, train=True):
         features = []
         for index, (y, dt) in enumerate(zip(ys, data)):
-            mean, std = dt.mean(axis=1), dt.std(axis=1)
-            feature = pd.DataFrame({'meanV': mean, 'stdV': std})
+            var = dt.var(axis=1)
+            std = np.sqrt(var)
+            feature = pd.DataFrame({'varV': var, 'stdV': std})
             if index % 2 == 0:
                 feature['labelV'] = y
             else:
@@ -26,13 +26,14 @@ class FeatureExtraction:
             x_train, y_train = train.iloc[:, :-1], train.iloc[:, -1:]
         return x_test, y_test, x_train, y_train
 
+
+
     @staticmethod
-    def apply_wavelet(ys, data, wavelet='haar', level=1):
+    def apply_wavelet(ys, data, wavelet='db4', level=2):
         def wavelet_decomposition(row):
             return pywt.wavedec(row, wavelet, level=level)[0].tolist()
 
         features = []
-
         for dt in data:
             features.append(pd.DataFrame(np.array(dt.apply(wavelet_decomposition, axis=1).tolist())))
 
