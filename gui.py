@@ -3,15 +3,16 @@ from tkinter import filedialog, ttk
 import preprocessing as ps
 import feature_extraction as fe
 import models as mod
+from matplotlib import pyplot as plt
 
 
 class Gui:
 
     def show_arrow(self, index):
         if index < len(self.mapped_predictions):
-            blink_image = tk.PhotoImage(file=f"images/{self.mapped_predictions[index]}_arrow.png")
-            self.label.config(text='', image=blink_image)
-            self.label.image = blink_image
+            image = tk.PhotoImage(file=f"images/{self.mapped_predictions[index]}_arrow.png")
+            self.label.config(text='', image=image)
+            self.label.image = image
         self.root.after(4000, lambda: self.show_arrow(index + 1))
 
     def load_folder(self):
@@ -19,15 +20,14 @@ class Gui:
         preprocessed_data = []
         for dt in data:
             preprocessed_data.append(ps.PreProcessing.preprocess_signal(dt))
+
         x_test, y_test, x_train, y_train = fe.FeatureExtraction.statistical_features(ys, preprocessed_data, False)
-        models, acc, mse, reports, mapped_predictions, predictions, _ = mod.Models.classify(x_test, y_test, le, x_train,
-                                                                                            y_train, False)
+        models, acc, mapped_predictions, predictions, _ = mod.Models.classify(x_test, y_test, le, x_train,
+                                                                              y_train, False)
         self.mapped_predictions = mapped_predictions
         self.predictions = predictions
         self.models = models
         self.acc = acc
-        print(predictions)
-        print(mapped_predictions)
         for i in range(len(models)):
             print(f'========== {models[i]} ==========')
             print(f"Test Accuracy: {acc[i]} %")
@@ -51,9 +51,9 @@ class Gui:
         for i in range(len(self.models)):
             self.models_tree.heading(i + 1, text=self.models[i])
             self.models_tree.column(i + 1, width=70)
-
         mapping = {
-            'yukarı' or 'yukari': 'up',
+            'yukari': 'up',
+            'yukarı': 'up',
             'asagi': 'down',
             'sag': 'right',
             'sol': 'left',
