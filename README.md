@@ -4,12 +4,12 @@
 
 ## Overview
 
-This project aims to classify Electrooculography (EOG) signals using various machine learning algorithms. EOG signals are typically used to measure eye movements and can provide valuable insights into various physiological and neurological conditions. The project involves preprocessing the EOG signals, extracting statistical features, and applying multiple classifiers to achieve optimal performance.
+This project aims to classify Electrooculography (EOG) signals using various machine-learning algorithms. EOG signals are typically used to measure eye movements and can provide valuable insights into various physiological and neurological conditions. The project involves preprocessing the EOG signals, extracting statistical features, and applying multiple classifiers to achieve optimal performance.
 
 ## Preprocessing
 
 The EOG signals are preprocessed to filter out noise and artifacts. The key steps include:
-1. **Band-pass Filtering**: Applying a band-pass filter to retain frequencies within the range of 0.5 to 20 Hz.
+1. **Band-pass Filtering**: Applying a band-pass filter to retain frequencies within the 0.5 to 20 Hz range.
 2. **Mean Subtraction**: Removing the mean to center the signals around zero.
 3. **Standardization**: Scaling the signals to have zero mean and unit variance.
 
@@ -84,7 +84,7 @@ To set up the project, follow these steps:
 
 Clone the repository:
    ```bash
-   git clone https://github.com/MernaAbdallah/eog-signal-classification.git
+   git clone [https://github.com/MernaAbdallah/eog-signal-classification.git](https://github.com/Shehab611/EOG-Signal-Classification.git)
    cd eog-signal-classification
    ```
 
