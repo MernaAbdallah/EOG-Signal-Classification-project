@@ -78,16 +78,6 @@ Several classifiers are used to classify the EOG signals. The models and their r
 
 The performance of each model is evaluated using standard metrics such as accuracy, precision, recall, and F1-score. The results are saved in the `results/` directory for further analysis.
 
-## Installation
-
-To set up the project, follow these steps:
-
-Clone the repository:
-   ```bash
-   git clone [https://github.com/MernaAbdallah/eog-signal-classification.git](https://github.com/Shehab611/EOG-Signal-Classification.git)
-   cd eog-signal-classification
-   ```
-
 ## Contributing
 
 Contributions are welcome! Please fork the repository and create a pull request with your changes.
